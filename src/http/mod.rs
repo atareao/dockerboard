@@ -1,4 +1,8 @@
+pub mod jwt_auth;
+pub mod user;
+
 use std::{sync::Arc, net::{SocketAddr, Ipv4Addr}};
+use async_trait;
 use axum::{
     Router,
     extract::FromRequestParts,
@@ -17,8 +21,8 @@ use tower::ServiceBuilder;
 use crate::models::config::Configuration;
 
 #[derive(Clone)]
-struct ApiContext {
-    config: Arc<Configuration>,
+struct AppState {
+    pub config: Configuration,
 }
 
 pub async fn serve(config: Configuration) -> anyhow::Result<()> {
@@ -38,5 +42,4 @@ pub async fn serve(config: Configuration) -> anyhow::Result<()> {
         .serve(app.into_make_service())
         .await
         .map_err(|_err| anyhow::anyhow!("Can't init"))
-    
 }
