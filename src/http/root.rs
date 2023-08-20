@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use axum::{
     Router,
+    extract::State,
     routing,
     response::{
         IntoResponse,
@@ -16,7 +17,6 @@ use minijinja::context;
 use crate::http::{
     AppState,
     jwt_auth::auth,
-    user::do_login,
 };
 
 use super::ENV;
@@ -29,18 +29,8 @@ pub fn router(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .route("/healthcheck",
             routing::get(healthcheck)
         )
-        .route("/status",
-            routing::get(get_root)
-        )
         .route("/",
             routing::get(get_root)
-                .route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
-        )
-        .route("/login",
-            routing::get(login)
-        )
-        .route("/login",
-            routing::post(do_login)
                 .route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
         )
 }
@@ -52,19 +42,12 @@ async fn favicon() -> impl IntoResponse {
 }
 
 async fn get_root(
+    State(app_state): State<Arc<AppState>>,
 ) -> impl IntoResponse{
     let template = ENV.get_template("index.html").unwrap();
     let ctx = context! {
-        title => "Title",
-    };
-    Html(template.render(ctx).unwrap())
-}
-
-async fn login(
-) -> impl IntoResponse{
-    let template = ENV.get_template("login.html").unwrap();
-    let ctx = context! {
-        title => "Title",
+        title => app_state.config.get_board_name(),
+        categories => app_state.config.get_categories(),
     };
     Html(template.render(ctx).unwrap())
 }

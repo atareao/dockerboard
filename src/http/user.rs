@@ -30,10 +30,13 @@ use super::ENV;
 
 pub fn router(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
-        .route("/api/v1/auth/logout",
-            routing::get(logout)
-                .route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
+        .route("/login",
+            routing::get(login).post(do_login)
         )
+        //.route("/login",
+        //    routing::post(do_login)
+        //        //.route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
+        //)
 }
 
 
@@ -85,6 +88,7 @@ pub async fn do_login(
     State(app_state): State<Arc<AppState>>,
     Form(user_data): Form<UserSchema>,
 ) -> impl IntoResponse{
+    tracing::info!("Post data: {:?}", user_data);
     match get_token(&app_state, user_data).await {
         Ok(token) => {
             let cookie = Cookie::build("token", token.to_owned())
@@ -102,7 +106,7 @@ pub async fn do_login(
                 .body(body::Empty::new())
                 .unwrap())
         },
-        Err(_) => {
+        Err(e) => {
             let cookie = Cookie::build("token", "")
                 .path("/")
                 .max_age(cookie::time::Duration::hours(0))
@@ -116,9 +120,12 @@ pub async fn do_login(
             //    .header(header::SET_COOKIE, cookie.to_string())
             //    .body(Html("Hola"))
             //    .unwrap())
-            let template = ENV.get_template("podcast.html").unwrap();
+            tracing::info!("{:?}", e);
+            let template = ENV.get_template("error.html").unwrap();
             let ctx = context! {
-                title => "Title",
+                title             => app_state.config.get_board_name(),
+                error_title       => "Error",
+                error_description => e.1.get("message"),
             };
             Err(Html(template.render(ctx).unwrap()))
         }
@@ -139,4 +146,14 @@ pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<serde_json:
         .insert(header::SET_COOKIE, cookie.to_string().parse().unwrap());
     tracing::info!("Deleting cookie");
     Ok(response)
+}
+
+pub async fn login(
+    State(app_state): State<Arc<AppState>>,
+) -> impl IntoResponse{
+    let template = ENV.get_template("login.html").unwrap();
+    let ctx = context! {
+        title => app_state.config.get_board_name(),
+    };
+    Html(template.render(ctx).unwrap())
 }
