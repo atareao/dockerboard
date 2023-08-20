@@ -1,17 +1,18 @@
 use std::sync::Arc;
 use axum::{
     extract::State,
-    http::{header, Request, StatusCode},
+    http::{header, Request},
     middleware::Next,
-    response::IntoResponse,
-    Json,
+    response::{IntoResponse, Html},
 };
 
 use axum_extra::extract::cookie::CookieJar;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::Serialize;
+use minijinja::context;
 
 use super::AppState;
+use super::ENV;
 
 use crate::models::user::TokenClaims;
 
@@ -26,7 +27,7 @@ pub async fn auth<B>(
     State(app_state): State<Arc<AppState>>,
     mut req: Request<B>,
     next: Next<B>,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<impl IntoResponse, Html<String>> {
     let token = cookie_jar
         .get("token")
         .map(|cookie| cookie.value().to_string())
@@ -44,11 +45,8 @@ pub async fn auth<B>(
         });
 
     let token = token.ok_or_else(|| {
-        let json_error = ErrorResponse {
-            status: "fail",
-            message: "You are not logged in, please provide token",
-        };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        let msg = "You are not logged. Please <a href='/login'>log in</a>";
+        get_html_error(&app_state, msg)
     })?;
 
     let claims = decode::<TokenClaims>(
@@ -57,23 +55,29 @@ pub async fn auth<B>(
         &Validation::default(),
     )
     .map_err(|_| {
-        let json_error = ErrorResponse {
-            status: "fail",
-            message: "Invalid token",
-        };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        let msg = "Invalid token. Please <a href='/login'>log in</a>";
+        get_html_error(&app_state, msg)
     })?
     .claims;
 
     let user_name = &claims.sub.to_string();
     let user = app_state.config.get_user(user_name).ok_or_else(|| {
-        let json_error = ErrorResponse {
-            status: "fail",
-            message: "The user belonging to this token no longer exists",
-        };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        let msg = "The user belonging to this token no longer exists. Please <a href='/login'>log in</a>";
+        get_html_error(&app_state, msg)
     })?;
+
 
     req.extensions_mut().insert(user);
     Ok(next.run(req).await)
+}
+
+fn get_html_error(app_state: &Arc<AppState>, msg: &str) -> Html<String>{
+    let template = ENV.get_template("error.html").unwrap();
+    let ctx = context! {
+        title             => app_state.config.get_board_name(),
+        error_title       => "Error",
+        error_description => msg,
+    };
+    let response = Html(template.render(ctx).unwrap());
+    response
 }

@@ -9,7 +9,6 @@ use axum::{
     http::{header, Response, StatusCode, },
     response::{IntoResponse, Html},
     Json,
-    middleware,
 };
 
 use axum_extra::extract::cookie::{Cookie, SameSite};
@@ -23,20 +22,15 @@ use crate::{
             TokenClaims,
     },
     http::AppState,
-    http::jwt_auth::auth,
 };
 
 use super::ENV;
 
-pub fn router(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
+pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/login",
             routing::get(login).post(do_login)
         )
-        //.route("/login",
-        //    routing::post(do_login)
-        //        //.route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
-        //)
 }
 
 
@@ -50,14 +44,14 @@ pub async fn get_token(
         .ok_or_else(|| {
             let error_response = serde_json::json!({
                 "status": "fail",
-                "message": "Invalid name or password",
+                "message": "Invalid name or password. Please <a href='/login'>log in</a>",
             });
             (StatusCode::BAD_REQUEST, Json(error_response))
         })?;
     if user.password != body.password{
         let error_response = serde_json::json!({
             "status": "fail",
-            "message": "Invalid name or password"
+            "message": "Invalid name or password. Please <a href='/login'>log in</a>"
         });
         return Err((StatusCode::BAD_REQUEST, Json(error_response)));
     }
@@ -78,7 +72,7 @@ pub async fn get_token(
     ).map_err(|e| {
         let error_response = serde_json::json!({
             "status": "error",
-            "message": format!("Encoding JWT error: {}", e),
+            "message": format!("Encoding JWT error: {}. Please <a href='/login'>log in</a>", e),
         });
         (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
     })?)
@@ -107,19 +101,6 @@ pub async fn do_login(
                 .unwrap())
         },
         Err(e) => {
-            let cookie = Cookie::build("token", "")
-                .path("/")
-                .max_age(cookie::time::Duration::hours(0))
-                .same_site(SameSite::Lax)
-                .http_only(true)
-                .finish();
-
-            //Err(Response::builder()
-            //    .status(StatusCode::SEE_OTHER)
-            //    .header(header::LOCATION, "/login?error=error")
-            //    .header(header::SET_COOKIE, cookie.to_string())
-            //    .body(Html("Hola"))
-            //    .unwrap())
             tracing::info!("{:?}", e);
             let template = ENV.get_template("error.html").unwrap();
             let ctx = context! {
@@ -132,6 +113,7 @@ pub async fn do_login(
     }
 }
 
+#[allow(dead_code)]
 pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     let cookie = Cookie::build("token", "")
         .path("/")

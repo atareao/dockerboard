@@ -64,6 +64,6 @@ pub async fn serve(config: Configuration) -> anyhow::Result<()> {
 fn api_router(app_state: AppState) -> Router {
     estatic::router()
         .merge(root::router(Arc::new(app_state.clone())))
-        .merge(user::router(Arc::new(app_state.clone())))
+        .merge(user::router())
         .with_state(Arc::new(app_state.clone()))
 }
