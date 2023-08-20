@@ -4,39 +4,40 @@ log_level: debug
 jwt_secret: un-secreto-muy-secreto
 jwt_expires_in: 60m
 jwt_maxage: 60
+board_name: Board
 users:
   - name: user1
-    password: pass1
+    password: password1
     active: true
   - name: user2
-    password: pass2
+    password: password2
     active: false
   - name: user3
-    password: pass2
+    password: password3
     active: true
 categories:
   - name: Category1
     description: Category1 description
-    icon: icon
+    icon: fa-solid fa-music
     apps:
       - name: App11
-        url: https://app11.sample.es
-        icon: icon11
+        url: https://atareao.es
+        icon: fa-solid fa-podcast
         description: App11 description
-        new_tab: false
+        new_tab: true
       - name: App12
-        url: https://app12.sample.es
-        icon: icon12
+        url: https://atareao.es
+        icon: fa-solid fa-guitar
         description: App12 description
         new_tab: false
       - name: App13
         url: https://app13.sample.es
-        icon: icon13
+        icon: fa-brands fa-soundcloud
         description: App13 description
         new_tab: false
   - name: Category2
     description: Category2 description
-    icon: icon
+    icon: user
     apps:
       - name: App21
         url: https://app21.sample.es
