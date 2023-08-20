@@ -1,12 +1,10 @@
 use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
 
-use super::config::Configuration;
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User{
     pub name: String,
-    pub hashed_password: String,
+    pub password: String,
     pub active: bool,
 }
 

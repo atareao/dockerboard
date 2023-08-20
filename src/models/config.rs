@@ -3,17 +3,44 @@ use serde_yaml::Error;
 
 use super::{category::Category, user::User};
 
+const DEFAULT_LOG_LEVEL: &'static str = "info";
+const DEFAULT_PORT: u16 = 6969;
+const DEFAULT_MAX_AGE: i32 = 60;
+const DEFAULT_EXPIRES: &'static str = "60m";
+
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Configuration{
+    url: String,
+    #[serde(default = "get_default_port")]
+    port: u16,
     #[serde(default = "get_default_log_level")]
     log_level: String,
+    jwt_secret: String,
+    #[serde(default = "get_default_expires")]
+    jwt_expires_in: String,
+    #[serde(default = "get_default_maxage")]
+    jwt_maxage: i32,
+    users: Vec<User>,
     categories: Vec<Category>,
-    users: Vec<User>
 }
 
 fn get_default_log_level() -> String{
-    "info".to_string()
+    DEFAULT_LOG_LEVEL.to_string()
 }
+
+fn get_default_port() -> u16{
+    DEFAULT_PORT
+}
+
+fn get_default_expires() -> String{
+    DEFAULT_EXPIRES.to_string()
+}
+
+fn get_default_maxage() -> i32{
+    DEFAULT_MAX_AGE
+}
+
 
 impl Configuration {
     pub fn new(content: &str) -> Result<Configuration, Error>{
@@ -22,6 +49,23 @@ impl Configuration {
 
     pub fn get_log_level(&self) -> &str{
         &self.log_level
+    }
+
+    pub fn get_port(&self) -> u16{
+        self.port
+    }
+    pub fn get_url(&self) -> &str{
+        &self.url
+    }
+
+    pub fn get_expires(&self) -> &str{
+        &self.jwt_expires_in
+    }
+    pub fn get_secret(&self) -> &str{
+        &self.jwt_secret
+    }
+    pub fn get_maxage(&self) -> &i32{
+        &self.jwt_maxage
     }
 
     pub fn get_users(&self) -> &Vec<User>{
@@ -33,9 +77,9 @@ impl Configuration {
     }
 
     pub fn get_user(&self, name: &str) -> Option<User>{
-        for user in self.users{
+        for user in &self.users{
             if user.name == name{
-                return Some(user)
+                return Some(user.clone())
             }
         }
         None

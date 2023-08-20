@@ -13,9 +13,7 @@ use serde::Serialize;
 
 use super::AppState;
 
-use crate::{
-    models::user::{TokenClaims, User},
-};
+use crate::models::user::TokenClaims;
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
@@ -79,5 +77,3 @@ pub async fn auth<B>(
     req.extensions_mut().insert(user);
     Ok(next.run(req).await)
 }
-
-
