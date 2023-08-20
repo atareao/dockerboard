@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Board{% endblock title %}
+{% block title %}{{title}}{% endblock title %}
 
 {% block head %}
     {{ super() }}
@@ -8,9 +8,24 @@
     </style>
 {% endblock head %}
 {% block main %}
-    <h1>U2VPodcast</h1>
-    <ul>
-        <li><a href="/channels">Channels</a></li>
-    </ul>
+<h1>{{title}}</h1>
+{% for category in categories %}
+<h4><i class="{{category.icon}}"></i> {{category.name}}</h4>
+<div class="row">
+    {% for app in category.apps %}
+    <div class="col">
+        {% if app.new_tab %}
+        <a href="{{app.url}}" target="_blank">
+        {% else %}
+        <a href="{{app.url}}">
+        {% endif %}
+            <summary><i class="{{app.icon}}"></i> {{app.name}}</summary>
+            <p>{{app.description}}</p>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
 {% endblock main %}
 

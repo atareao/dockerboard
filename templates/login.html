@@ -1,17 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock title %}
-{% block head %}
-    {{ super() }}
-    <script src="/assets/js/login.js"></script>
-{% endblock head %}
+{% block title %}{{title}}{% endblock title %}
 
 {% block main %}
-<h2 class="text-center">Login</h2>
+<h2 class="text-center">{{title}}</h2>
 <form action="/login" id="loginForm" method="post">
     <div class="input-group">
-        <label for="email" class="label">Email</label>
-        <input type="email" name="email" id="email" class="input">
-        <div id="email-notification" class="alert" hidden></div>
+        <label for="name" class="label">Name</label>
+        <input type="text" name="name" id="name" class="input">
+        <div id="name-notification" class="alert" hidden></div>
     </div>
     <br>
     <div class="input-group">

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock title %}
+
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock head %}
+{% block main %}
+    <article>
+        <div  class="alert">
+            <p class="alert-danger">{{error_description}}</p>
+        </div>
+    </article>
+{% endblock main %}
+
+
