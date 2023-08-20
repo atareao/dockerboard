@@ -8,9 +8,13 @@
     </style>
 {% endblock head %}
 {% block main %}
-<h1>{{title}}</h1>
+<div class="is-center">
+    <h1>{{title}}</h1>
+</div>
 {% for category in categories %}
-<h4><i class="{{category.icon}}"></i> {{category.name}}</h4>
+<div class="is-center">
+    <h4><i class="{{category.icon}}"></i> {{category.name}}</h4>
+</div>
 <div class="row">
     {% for app in category.apps %}
     <div class="col">
