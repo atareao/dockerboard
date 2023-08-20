@@ -21,6 +21,7 @@ pub struct Configuration{
     jwt_expires_in: String,
     #[serde(default = "get_default_maxage")]
     jwt_maxage: i32,
+    board_name: String,
     users: Vec<User>,
     categories: Vec<Category>,
 }
@@ -66,6 +67,10 @@ impl Configuration {
     }
     pub fn get_maxage(&self) -> &i32{
         &self.jwt_maxage
+    }
+
+    pub fn get_board_name(&self) -> &str{
+        &self.board_name
     }
 
     pub fn get_users(&self) -> &Vec<User>{
