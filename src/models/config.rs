@@ -59,22 +59,12 @@ impl Configuration {
         &self.url
     }
 
-    pub fn get_expires(&self) -> &str{
-        &self.jwt_expires_in
-    }
     pub fn get_secret(&self) -> &str{
         &self.jwt_secret
-    }
-    pub fn get_maxage(&self) -> &i32{
-        &self.jwt_maxage
     }
 
     pub fn get_board_name(&self) -> &str{
         &self.board_name
-    }
-
-    pub fn get_users(&self) -> &Vec<User>{
-        &self.users
     }
 
     pub fn get_categories(&self) -> &Vec<Category>{
