@@ -8,11 +8,18 @@
     </style>
 {% endblock head %}
 {% block main %}
-    <article>
-        <div  class="alert">
-            <p class="alert-danger">{{error_description}}</p>
+    <div class="hero is-full-screen">
+        <div class="is-center is-vertical-align">
+    <section>
+        <div  class="card card-error">
+            <header>
+                <h4>Error</h4>
+            </header>
+            <p class="alert-danger">{{error_description|safe}}</p>
         </div>
-    </article>
+    </section>
+        </div>
+    </div>
 {% endblock main %}
 
 
