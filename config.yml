@@ -1,0 +1,55 @@
+url: https://board.sample.es
+port: 6969
+log_level: debug
+jwt_secret: un-secreto-muy-secreto
+jwt_expires_in: 60m
+jwt_maxage: 60
+users:
+  - name: user1
+    password: pass1
+    active: true
+  - name: user2
+    password: pass2
+    active: false
+  - name: user3
+    password: pass2
+    active: true
+categories:
+  - name: Category1
+    description: Category1 description
+    icon: icon
+    apps:
+      - name: App11
+        url: https://app11.sample.es
+        icon: icon11
+        description: App11 description
+        new_tab: false
+      - name: App12
+        url: https://app12.sample.es
+        icon: icon12
+        description: App12 description
+        new_tab: false
+      - name: App13
+        url: https://app13.sample.es
+        icon: icon13
+        description: App13 description
+        new_tab: false
+  - name: Category2
+    description: Category2 description
+    icon: icon
+    apps:
+      - name: App21
+        url: https://app21.sample.es
+        icon: icon21
+        description: App21 description
+        new_tab: false
+      - name: App22
+        url: https://app22.sample.es
+        icon: icon22
+        description: App22 description
+        new_tab: false
+      - name: App23
+        url: https://app23.sample.es
+        icon: icon23
+        description: App23 description
+        new_tab: false
