@@ -8,4 +8,3 @@ pub struct Category{
     pub description: String,
     pub apps: Vec<App>,
 }
-
