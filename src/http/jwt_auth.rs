@@ -14,7 +14,7 @@ use minijinja::context;
 use super::AppState;
 use super::ENV;
 
-use crate::models::user::TokenClaims;
+use crate::models::TokenClaims;
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {

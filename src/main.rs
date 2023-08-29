@@ -7,7 +7,7 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
-use models::config::Configuration;
+use models::Configuration;
 
 mod http;
 mod models;
