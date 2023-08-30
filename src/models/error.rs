@@ -21,3 +21,16 @@ impl fmt::Display for CustomError {
 
 impl error::Error for CustomError {}
 
+pub enum DBError {
+    CE(CustomError),
+    DE(docker_api::Error),
+}
+
+impl Into<DBError> for docker_api::Error{
+    fn into(self) -> DBError{
+        DBError::DE(self)
+    }
+
+}
+
+
