@@ -23,7 +23,7 @@ use tower_http::{
 };
 use once_cell::sync::Lazy;
 
-use crate::models::config::Configuration;
+use super::models::Configuration;
 
 pub static ENV: Lazy<Environment<'static>> = Lazy::new(|| {
     let mut env = Environment::new();

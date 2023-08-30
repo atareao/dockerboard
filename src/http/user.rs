@@ -17,7 +17,7 @@ use serde_json::json;
 use minijinja::context;
 
 use crate::{
-    models::user::{
+    models::{
             UserSchema,
             TokenClaims,
     },
