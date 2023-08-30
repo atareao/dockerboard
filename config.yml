@@ -4,7 +4,7 @@ log_level: debug
 jwt_secret: un-secreto-muy-secreto
 jwt_expires_in: 60m
 jwt_maxage: 60
-board_name: Board
+board_name: DockerBoard
 users:
   - name: user1
     password: password1
@@ -19,38 +19,6 @@ categories:
   - name: Category1
     description: Category1 description
     icon: fa-solid fa-music
-    apps:
-      - name: App11
-        url: https://atareao.es
-        icon: fa-solid fa-podcast
-        description: App11 description
-        new_tab: true
-      - name: App12
-        url: https://atareao.es
-        icon: fa-solid fa-guitar
-        description: App12 description
-        new_tab: false
-      - name: App13
-        url: https://app13.sample.es
-        icon: fa-brands fa-soundcloud
-        description: App13 description
-        new_tab: false
   - name: Category2
     description: Category2 description
     icon: user
-    apps:
-      - name: App21
-        url: https://app21.sample.es
-        icon: icon21
-        description: App21 description
-        new_tab: false
-      - name: App22
-        url: https://app22.sample.es
-        icon: icon22
-        description: App22 description
-        new_tab: false
-      - name: App23
-        url: https://app23.sample.es
-        icon: icon23
-        description: App23 description
-        new_tab: false
