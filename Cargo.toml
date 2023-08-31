@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
-axum = { version = "0.6.20", features = ["multipart"] }
+axum = { version = "0.6.20", features = ["multipart", "ws"] }
 axum-extra = { version = "0.7.7", features = ["cookie"] }
 base64 = "0.21.2"
 chrono = { version = "0.4.26", features = ["serde"] }
@@ -23,3 +23,4 @@ tokio = { version = "1.32.0", features = ["full", "time", "tracing"] }
 tower-http = { version = "0.4.3", features = ["trace", "fs", "cors"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+futures = "0.3"
