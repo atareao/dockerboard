@@ -4,6 +4,7 @@ log_level: debug
 jwt_secret: un-secreto-muy-secreto
 jwt_expires_in: 60m
 jwt_maxage: 60
+docker_uri: unix:///run/user/1000/docker.sock
 board_name: DockerBoard
 users:
   - name: user1
