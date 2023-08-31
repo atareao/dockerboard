@@ -1,4 +1,3 @@
-use docker_api::{Docker, opts::ContainerListOpts};
 use tokio;
 use std::{process, str::FromStr};
 use tracing_subscriber::{
@@ -6,21 +5,52 @@ use tracing_subscriber::{
     layer::SubscriberExt,
     util::SubscriberInitExt,
 };
+use futures::StreamExt;
+use docker_api::{Docker, models::EventMessage, opts::EventsOptsBuilder};
+use tracing::{info, debug, error};
 
 use models::Configuration;
+use tokio::sync::broadcast;
 
 mod http;
 mod models;
 
+#[derive(Clone)]
+pub struct AppState {
+    pub config: Configuration,
+    pub tx: broadcast::Sender<String>,
+}
+
 #[tokio::main]
 async fn main(){
-    let configuration = read_configuration().await;
+    let mut configuration = read_configuration().await;
 
     tracing_subscriber::registry()
         .with(EnvFilter::from_str(configuration.get_log_level()).unwrap())
         .with(tracing_subscriber::fmt::layer())
         .init();
-    http::serve(configuration).await.unwrap();
+    if configuration.init().await.is_err(){
+        println!("Can not init");
+        process::exit(0);
+    }
+
+    let (tx, mut rx): (
+        broadcast::Sender<String>,
+        broadcast::Receiver<String>
+    ) = broadcast::channel(2);
+
+    let tx2 = tx.clone();
+    let configuration2 = configuration.clone();
+    let app_state = AppState{
+        config: configuration,
+        tx,
+    };
+
+    println!("Antes");
+    tokio::spawn(async move {
+        process_docker_events(&configuration2, &tx2).await;
+    });
+    http::serve(app_state).await.unwrap();
 }
 
 async fn read_configuration() -> Configuration{
@@ -32,7 +62,7 @@ async fn read_configuration() -> Configuration{
                     e.to_string());
                 process::exit(0);
             }
-        };
+    };
     match Configuration::new(&content){
         Ok(configuration) => configuration,
         Err(e) => {
@@ -43,47 +73,22 @@ async fn read_configuration() -> Configuration{
     }
 }
 
-async fn read_containers(configuration: &mut Configuration){
-    if configuration.get_docker_uri().is_none(){
-        return;
-    }
+async fn process_docker_events(configuration: &Configuration, sender: &broadcast::Sender<String>){
+    let hostname = "Este";
     let uri = configuration.get_docker_uri().unwrap();
-    match Docker::new(uri) {
-        Ok(docker) => {
-            let mut categories = configuration.get_categories();
-            let category_names:Vec<String> = configuration.get_categories().into_iter().map(|item| item.name.to_owned()).collect();
-            let opts = ContainerListOpts::builder().build();
-            let containers = docker.containers().list(&opts).await.unwrap_or_default();
-            for container in containers {
-                let labels = container.labels.unwrap_or_default();
-                if !labels.is_empty() && 
-                        labels.contains_key("board.enable") && 
-                        labels.get("board.enable") == Some(&"true".to_string()) &&
-                        labels.contains_key("board.category") && labels.get("board.category").is_some() &&
-                        labels.contains_key("board.app.name") && labels.get("board.app.name").is_some() &&
-                        labels.contains_key("board.app.url") && labels.get("board.app.url").is_some() {
-                    let category = labels.get("board.category").unwrap();
-                    if category_names.contains(category) {
-                        let name = labels.get("board.app.name").unwrap();
-                        let url = labels.get("board.app.url").unwrap();
-                        let icon = match labels.get("board.app.icon"){
-                                Some(icon) => icon,
-                                None => ""
-                        };
-                        let description = match labels.get("board.app.description"){
-                                Some(description) => description,
-                                None => ""
-                        };
-                        let new_tab = match labels.get("board.app.name"){
-                                Some(new_tab) => new_tab.to_lowercase() == "true" || new_tab.to_lowercase() == "yes",
-                            None => false,
-                        };
-                    }
-                }
-            }
-        },
-        Err(e) => {
-            tracing::error!("Error with docker: {}", e);
-        },
+    let docker = Docker::new(uri).unwrap();
+    while let Some(event_result) = docker.events(&EventsOptsBuilder::default().build()).next().await {
+        match event_result {
+            Ok(event_message) => {
+                debug!("event => {:?}", event_message);
+                sender.send(format!("Message: {:?}", event_message));
+                //process(event, &configuration, &hostname).await;
+            },
+            Err(e) => error!("Error: {}", e),
+        };
     }
+}
+
+async fn process(event: EventMessage){
+    debug!("event => {:?}", event);
 }

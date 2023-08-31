@@ -21,6 +21,7 @@ use crate::http::{
 
 use super::ENV;
 
+//pub fn router(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
 pub fn router(app_state: Arc<AppState>) -> Router<Arc<AppState>> {
     Router::new()
         .route("/favicon.ico",
