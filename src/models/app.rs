@@ -4,8 +4,9 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct App{
     pub name: String,
-    pub url: Option<String>,
-    pub icon: Option<String>,
+    pub description: String,
+    pub url: String,
+    pub icon: String,
     pub new_tab: bool,
     pub container_id: Option<String>,
     pub container_name: Option<Vec<String>>,
@@ -19,13 +20,17 @@ impl App{
         let labels = summary.labels.unwrap();
 
         let name =  labels.get("es.atareao.board.name").unwrap().to_string();
+        let description = match &labels.get("es.atareao.board.description"){
+            Some(description) => description.to_string(),
+            None => "".to_string(),
+        };
         let url = match &labels.get("es.atareao.board.url"){
-            Some(url) => Some(url.to_string()),
-            None => None
+            Some(url) => url.to_string(),
+            None => "".to_string(),
         };
         let icon = match &labels.get("es.atareao.board.icon"){
-            Some(icon) => Some(icon.to_string()),
-            None => None
+            Some(icon) => icon.to_string(),
+            None => "".to_string(),
         };
         let new_tab = match &labels.get("es.atareao.board.new_tab"){
             Some(new_tab) => *new_tab == "true",
@@ -38,6 +43,7 @@ impl App{
         let state = summary.state;
         Self{
             name,
+            description,
             url,
             icon,
             new_tab,

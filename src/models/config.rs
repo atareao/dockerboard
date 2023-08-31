@@ -1,7 +1,9 @@
 use serde::{Serialize, Deserialize};
 use serde_yaml::Error;
+use docker_api::Docker;
+use tracing::{info, debug, error};
 
-use super::{category::Category, user::User, app::App};
+use super::{category::Category, user::User, app::App, error::CustomError};
 
 const DEFAULT_LOG_LEVEL: &'static str = "info";
 const DEFAULT_PORT: u16 = 6969;
@@ -51,7 +53,26 @@ fn get_default_docker_uri() -> Option<String>{
 
 impl Configuration {
     pub fn new(content: &str) -> Result<Configuration, Error>{
+        info!("new");
         serde_yaml::from_str(content)
+    }
+
+    pub async fn init(&mut self) -> Result<(), CustomError>{
+        let uri = self.get_docker_uri().unwrap();
+        match Docker::new(uri) {
+            Ok(docker) => {
+                for category in &mut self.categories{
+                    debug!("{:?}", category);
+                    category.init(&docker).await
+                }
+                println!("{:?}", &self);
+                Ok(())
+            },
+            Err(e) => {
+                Err(CustomError::new(e.to_string()))
+            }
+        }
+
     }
 
     pub fn get_log_level(&self) -> &str{
@@ -99,6 +120,7 @@ impl Configuration {
         None
     }
 
+    #[allow(unused)]
     pub fn category_has_app(category: &Category, app: &App) -> bool{
         for category_app in category.apps.iter(){
             if app.name == category_app.name || app.url == category_app.url{
@@ -108,6 +130,7 @@ impl Configuration {
         false
     }
 
+    #[allow(unused)]
     pub fn add_app_in_category(&mut self, category_name: &str, app: App) -> Result<String, String>{
         let app_name = &app.name.clone();
         match self.get_category_by_name(category_name){

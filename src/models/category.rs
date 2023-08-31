@@ -4,10 +4,10 @@ use docker_api::{
     opts::{
         ContainerListOpts,
         ContainerFilter
-    }, models::ContainerSummary,
+    },
 };
-use tracing::{info, error};
-use super::{error::DBError, App};
+use tracing::{info, debug, error};
+use super::App;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Category{
@@ -23,8 +23,8 @@ fn get_default_apps() -> Vec<App>{
 }
 
 impl Category {
-    pub async fn get_containers(&self, docker: &Docker) -> Vec<App>{
-        info!("get_containers");
+    pub async fn init(&mut self, docker: &Docker) {
+        info!("init");
         let mut filters: Vec<ContainerFilter> = Vec::new();
         filters.push(ContainerFilter::Label(
             "es.atareao.board.active".to_string(),
@@ -37,17 +37,17 @@ impl Category {
         let opts = ContainerListOpts::builder()
             .filter(filters)
             .build();
+        debug!("Opts: {:?}", &opts);
+        self.apps = Vec::new();
         match docker.containers().list(&opts).await{
             Err(e) => {
                 error!("{:?}", e);
-                Vec::new()
             },
             Ok(container_summaries) => {
-                let mut containers: Vec<App> = Vec::new();
+                debug!("{:?}", container_summaries);
                 for summary in container_summaries.into_iter(){
-                    containers.push(App::from_summary(summary));
+                    self.apps.push(App::from_summary(summary));
                 }
-                containers
             }
         }
     }
