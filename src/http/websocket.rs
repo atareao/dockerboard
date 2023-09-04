@@ -1,21 +1,28 @@
 
 use axum::{
     extract::{
-        ws::{Message, WebSocket, WebSocketUpgrade},
         State,
+        ws::{WebSocket, Message, WebSocketUpgrade},
     },
     response::IntoResponse,
     routing,
     Router,
 };
-use futures::{sink::SinkExt, stream::StreamExt};
+use futures::{
+    sink::SinkExt,
+    stream::{
+        StreamExt,
+        SplitSink,
+        SplitStream,
+    }
+};
 use std::sync::Arc;
 use tracing::{info, debug, error};
 use crate::http::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/websocket",
+        .route("/ws",
             routing::get(websocket_handler)
         )
 }
@@ -31,32 +38,12 @@ async fn websocket(stream: WebSocket, state: Arc<AppState>) {
     // By splitting, we can send and receive at the same time.
     let (mut sender, mut receiver) = stream.split();
 
-    // Username gets set in the receive loop, if it's valid.
-    let mut username = String::new();
-    // Loop until a text message is found.
-    while let Some(Ok(message)) = receiver.next().await {
-        debug!("{:?}", &message);
-        if let Message::Text(name) = message {
-            // If username that is sent by client is not taken, fill username string.
-            // If not empty we want to quit the loop else we want to quit function.
-            if !username.is_empty() {
-                break;
-            } else {
-                // Only send our client that username is taken.
-                let _ = sender
-                    .send(Message::Text(String::from("Username already taken.")))
-                    .await;
-
-                return;
-            }
-        }
-    }
-
     // We subscribe *before* sending the "joined" message, so that we will also
     // display it to our client.
-    //let mut rx = state.tx.subscribe();
+    let mut rx = state.tx.subscribe();
 
     // Now send the "joined" message to all subscribers.
+    let username = "";
     let msg = format!("{} joined.", username);
     tracing::debug!("{}", msg);
     let _ = state.tx.send(msg);
