@@ -30,7 +30,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY src src
 
 RUN cargo build --release --target x86_64-unknown-linux-musl && \
-    cp /app/target/x86_64-unknown-linux-musl/release/board /app/board
+    cp /app/target/x86_64-unknown-linux-musl/release/dockerboard /app/dockerboard
 
 
 ###############################################################################
@@ -47,7 +47,7 @@ RUN apk add --update --no-cache \
     rm -rf /var/lib/app/lists*
 
 # Copy our build
-COPY --from=builder /app/board /app/
+COPY --from=builder /app/dockerboard /app/
 # Copy directories
 COPY assets/ app/assets/
 COPY templates/ app/templates/
@@ -61,11 +61,11 @@ RUN adduser \
     --shell "/sbin/nologin" \
     --uid "${UID}" \
     "${USER}" && \
-    chmod 700 /app/board && \
+    chmod 700 /app/dockerboard && \
     chown -R app:app /app
 
 # Set the work dir
 WORKDIR /app
 USER app
 
-CMD ["/app/board"]
+CMD ["/app/dockerboard"]
