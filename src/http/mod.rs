@@ -3,6 +3,7 @@ pub mod user;
 pub mod estatic;
 pub mod root;
 pub mod websocket;
+pub mod sse;
 
 use tokio::sync::broadcast;
 use std::{sync::Arc, net::{SocketAddr, Ipv4Addr}};
@@ -64,5 +65,6 @@ fn api_router(app_state: AppState) -> Router {
         .merge(root::router(Arc::new(app_state.clone())))
         .merge(user::router())
         .merge(websocket::router())
+        .merge(sse::router())
         .with_state(Arc::new(app_state))
 }
