@@ -5,16 +5,12 @@ document.addEventListener('readystatechange', function(event) {
 });
 
 function onload(){
-    // Create WebSocket connection.
-    const socket = new WebSocket("ws://localhost:6969/websocket");
+    const itemEjemplo = document.getElementById("ejemplo");
+    var eventSource = new EventSource("/sse");
+    eventSource.onmessage = function (e) {
+        var newElement = document.createElement("li");
 
-    // Connection opened
-    socket.addEventListener("open", (event) => {
-      socket.send("Hello Server!");
-    });
-
-    // Listen for messages
-    socket.addEventListener("message", (event) => {
-      console.log("Message from server ", event.data);
-    });
+        newElement.innerHTML = "message: " + e.data;
+        ejemplo.appendChild(newElement);
+    };
 }
